@@ -1,0 +1,53 @@
+name: Coverage Report
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP & Xdebug
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: xdebug
+
+      - name: Install dependencies
+        working-directory: DATAFILLER
+        run: composer install --no-interaction
+        
+      - name: Regenerate Composer autoloader
+        working-directory: DATAFILLER
+        run: composer dump-autoload -o
+
+      - name: Ensure phpunit is executable
+        working-directory: DATAFILLER
+        run: chmod +x vendor/bin/phpunit
+
+      - name: Run PHPUnit & Generate HTML Coverage
+        working-directory: DATAFILLER
+        run: |
+          php vendor/bin/phpunit -c phpunit.xml --coverage-html coverage-report
+
+      - name: Upload coverage-report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: DATAFILLER/coverage-report
+
+      - name: Publish coverage to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: DATAFILLER/coverage-report
+          publish_branch: gh-pages
+          user_name: github-actions
+          user_email: github-actions@github.com

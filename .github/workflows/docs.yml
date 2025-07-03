@@ -1,0 +1,47 @@
+name: Generate Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**/*.md'
+      - 'docs/docfx.json'
+
+jobs:
+  build-docs:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup DocFX
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/dotnet/docfx/releases/download/v2.78.3/docfx-win-x64-v2.78.3.zip" -OutFile "docfx.zip"
+        Expand-Archive -Path "docfx.zip" -DestinationPath "docfx"
+        
+    - name: Build Documentation
+      run: |
+        cd docs
+        ..\docfx\docfx.exe docfx.json
+        
+    - name: Create docs folder structure
+      run: |
+        mkdir deploy
+        mkdir deploy\docs
+        xcopy docs\_site deploy\docs /E /I
+        xcopy DATAFILLER deploy /E /I
+        
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'datafiller2'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ./deploy
+        
+    - name: Upload artifact (backup)
+      uses: actions/upload-artifact@v4
+      with:
+        name: datafiller-documentation-${{ github.run_number }}
+        path: docs/_site
+        retention-days: 30
