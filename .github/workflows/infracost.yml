@@ -1,7 +1,7 @@
 name: Terraform Cost Estimation with Infracost
 
 on:
-  push:
+  push:  #free
     branches: [main]
   workflow_dispatch:
 
