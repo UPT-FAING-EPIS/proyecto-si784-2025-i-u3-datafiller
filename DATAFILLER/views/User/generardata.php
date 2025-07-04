@@ -1,4 +1,21 @@
-<?php include 'header.php'; ?>
+<?php 
+// ✅ AGREGAR TELEMETRÍA AL INICIO DE GENERARDATA.PHP (antes del include header)
+session_start(); // Asegurar que la sesión esté iniciada
+
+require_once __DIR__ . '/../../vendor/autoload.php';
+use App\Config\ApplicationInsights;
+use App\Helpers\TelemetryHelper;
+
+// Trackear acceso a la página
+if (isset($_SESSION['usuario'])) {
+    TelemetryHelper::trackGenerarDataAccess(
+        $_SESSION['usuario']['id'], 
+        $_SESSION['usuario']['nombre']
+    );
+}
+
+include 'header.php'; 
+?>
 
 <div class="tab-container">
     <div class="tabs">
@@ -89,9 +106,66 @@
                 <div class="separator-line"></div>
             </div>
 
+            <!-- SECCIÓN: GitHub -->
+            <div class="github-input-section">
+                <h3>🐙 Opción 2: Cargar desde repositorio de GitHub</h3>
+                <div class="github-container">
+                    <div class="github-step">
+                        <label>👤 Usuario/Organización de GitHub:</label>
+                        <input type="text" id="githubUser" placeholder="ejemplo: tu-usuario" class="github-input">
+                    </div>
+                    
+                    <div class="github-step">
+                        <label>📁 Repositorio:</label>
+                        <select id="githubRepo" class="github-select" disabled>
+                            <option value="">Primero selecciona un usuario</option>
+                        </select>
+                        <button type="button" id="loadRepos" class="btn small-btn" disabled>🔄 Cargar Repositorios</button>
+                    </div>
+                    
+                    <div class="github-step">
+                        <label>📂 Ruta del archivo (opcional):</label>
+                        <input type="text" id="githubPath" placeholder="ejemplo: database/schema.sql o deja vacío para buscar en raíz" class="github-input" disabled>
+                    </div>
+                    
+                    <div class="github-step">
+                        <label>📄 Archivos disponibles:</label>
+                        <select id="githubFiles" class="github-select" disabled>
+                            <option value="">Selecciona repositorio y ruta primero</option>
+                        </select>
+                        <button type="button" id="loadFiles" class="btn small-btn" disabled>🔍 Buscar Archivos .sql</button>
+                    </div>
+                    
+                    <div class="github-actions">
+                        <button type="button" id="previewGithubFile" class="btn secondary-btn" disabled>
+                            👁️ Vista Previa
+                        </button>
+                        <button type="button" id="loadGithubFile" class="btn primary-btn" disabled>
+                            ⬇️ Cargar Archivo
+                        </button>
+                    </div>
+                    
+                    <!-- Preview del archivo -->
+                    <div class="github-preview" id="githubPreview" style="display: none;">
+                        <div class="preview-header">
+                            <h4>Vista previa del archivo:</h4>
+                            <span class="preview-info" id="previewInfo"></span>
+                        </div>
+                        <pre class="preview-content" id="previewContent"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEPARADOR -->
+            <div class="separator">
+                <div class="separator-line"></div>
+                <span class="separator-text">O</span>
+                <div class="separator-line"></div>
+            </div>
+
             <!-- SECCIÓN: Textarea manual -->
             <div class="manual-input-section">
-                <h3>✍️ Opción 2: Escribir/Pegar script manualmente</h3>
+                <h3>✍️ Opción 3: Escribir/Pegar script manualmente</h3>
                 <div class="form-group">
                     <div class="textarea-header">
                         <span class="textarea-label">Script de definición de tablas:</span>
@@ -175,6 +249,85 @@ CREATE TABLE productos (
     </div>
 </div>
 
+<!-- ✅ AGREGAR APPLICATION INSIGHTS JAVASCRIPT -->
+<?php echo ApplicationInsights::getJavaScriptSnippet(); ?>
+
+<script>
+// ✅ CONFIGURAR TELEMETRÍA FRONTEND
+<?php if(isset($_SESSION['usuario'])): ?>
+// Configurar usuario autenticado en Application Insights
+if (typeof appInsights !== 'undefined') {
+    appInsights.setAuthenticatedUserContext('<?php echo $_SESSION['usuario']['id']; ?>', '<?php echo addslashes($_SESSION['usuario']['nombre']); ?>');
+    
+    // Trackear información del plan del usuario
+    appInsights.trackEvent({
+        name: 'GenerarDataPageView',
+        properties: {
+            userId: '<?php echo $_SESSION['usuario']['id']; ?>',
+            userName: '<?php echo addslashes($_SESSION['usuario']['nombre']); ?>',
+            plan: '<?php echo $plan_usuario; ?>',
+            consultasRestantes: '<?php echo $consultas_restantes; ?>',
+            page: 'generardata'
+        }
+    });
+}
+<?php endif; ?>
+
+// Trackear envío del formulario
+document.querySelector('form').addEventListener('submit', function(e) {
+    <?php if(isset($_SESSION['usuario'])): ?>
+    if (typeof appInsights !== 'undefined') {
+        const dbType = document.querySelector('input[name="dbType"]:checked').value;
+        
+        // 🔍 DETECTAR QUÉ OPCIÓN USÓ EL USUARIO
+        let sourceOption = 'unknown';
+        const fileInput = document.querySelector('input[name="database_file"]');
+        const textareaInput = document.querySelector('textarea[name="script"]');
+        
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+            sourceOption = 'file_upload'; // Opción 1: Archivo
+        } else if (textareaInput && textareaInput.value.trim() !== '') {
+            // Verificar si viene de GitHub o es manual
+            const githubContainer = document.querySelector('.github-container');
+            if (githubContainer && githubContainer.dataset.githubUsed === 'true') {
+                sourceOption = 'github'; // Opción 2: GitHub
+            } else {
+                sourceOption = 'manual'; // Opción 3: Manual
+            }
+        }
+        
+        appInsights.trackEvent({
+            name: 'SqlAnalysisSubmitted',
+            properties: {
+                userId: '<?php echo $_SESSION['usuario']['id']; ?>',
+                userName: '<?php echo addslashes($_SESSION['usuario']['nombre']); ?>',
+                dbType: dbType,
+                sourceOption: sourceOption, // 🎯 NUEVA MÉTRICA
+                timestamp: new Date().toISOString()
+            }
+        });
+    }
+    <?php endif; ?>
+});
+
+// Trackear clics en las pestañas
+document.querySelectorAll('.tab').forEach(function(tab) {
+    tab.addEventListener('click', function(e) {
+        if (typeof appInsights !== 'undefined') {
+            appInsights.trackEvent({
+                name: 'TabClick',
+                properties: {
+                    tabName: this.textContent.trim(),
+                    fromPage: 'generardata',
+                    userId: '<?php echo $_SESSION['usuario']['id'] ?? 'anonymous'; ?>'
+                }
+            });
+        }
+    });
+});
+</script>
+
 <script src="../../public/js/file-upload.js"></script>
+<script src="../../public/js/github-integration.js"></script>
 
 <?php include 'footer.php'; ?>
