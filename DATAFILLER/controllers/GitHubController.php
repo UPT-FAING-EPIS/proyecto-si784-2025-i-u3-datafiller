@@ -250,7 +250,7 @@ class GitHubController {
 }
 
 // ===== ENDPOINT API =====
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
     
     $input = json_decode(file_get_contents('php://input'), true);

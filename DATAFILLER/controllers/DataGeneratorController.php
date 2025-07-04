@@ -532,7 +532,7 @@ class DataGeneratorController {
 }
 
 // Procesar la solicitud
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     session_start();
     if (!isset($_SESSION['usuario'])) {
         header('Location: ../views/Auth/login.php');
