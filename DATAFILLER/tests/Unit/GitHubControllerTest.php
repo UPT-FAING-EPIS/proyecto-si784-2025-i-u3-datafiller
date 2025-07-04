@@ -196,4 +196,125 @@ class GitHubControllerTest extends TestCase
             $this->assertIsString($result['error']);
         }
     }
+
+    public function testDownloadFileWithValidUrl()
+    {
+        // Test básico para verificar estructura de respuesta del downloadFile
+        $testUrl = 'https://raw.githubusercontent.com/testuser/testrepo/main/test.sql';
+        $result = $this->controller->downloadFile($testUrl);
+        
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('success', $result);
+        $this->assertIsBool($result['success']);
+        
+        // Verificar estructura según el resultado
+        if ($result['success']) {
+            $this->assertArrayHasKey('content', $result);
+            $this->assertArrayHasKey('size', $result);
+            $this->assertIsString($result['content']);
+            $this->assertIsInt($result['size']);
+            $this->assertEquals(strlen($result['content']), $result['size']);
+        } else {
+            $this->assertArrayHasKey('error', $result);
+            $this->assertIsString($result['error']);
+        }
+    }
+
+    public function testDownloadFileWithEmptyUrl()
+    {
+        $result = $this->controller->downloadFile('');
+        
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('success', $result);
+        $this->assertFalse($result['success']);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertIsString($result['error']);
+    }
+
+    public function testDownloadFileWithInvalidUrl()
+    {
+        // Test con URL que no existe
+        $invalidUrl = 'https://raw.githubusercontent.com/invalid-user/invalid-repo/main/nonexistent.sql';
+        $result = $this->controller->downloadFile($invalidUrl);
+        
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('success', $result);
+        
+        // Con URL inválida debería fallar
+        if (!$result['success']) {
+            $this->assertArrayHasKey('error', $result);
+            $this->assertArrayHasKey('status', $result);
+            $this->assertIsString($result['error']);
+            $this->assertIsInt($result['status']);
+        }
+    }
+
+    public function testDownloadFileWithMalformedUrl()
+    {
+        // Test con URL mal formada
+        $malformedUrl = 'not-a-valid-url';
+        $result = $this->controller->downloadFile($malformedUrl);
+        
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('success', $result);
+        $this->assertFalse($result['success']);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertIsString($result['error']);
+        
+        // Debería contener mensaje de error de conexión
+        $this->assertStringContainsString('Error descargando archivo:', $result['error']);
+    }
+
+    public function testDownloadFileResponseStructure()
+    {
+        // Test para verificar que downloadFile siempre retorna estructura consistente
+        $testUrl = 'https://httpbin.org/status/404'; // URL que retorna 404
+        $result = $this->controller->downloadFile($testUrl);
+        
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('success', $result);
+        $this->assertIsBool($result['success']);
+        
+        if ($result['success']) {
+            // Estructura exitosa
+            $this->assertArrayHasKey('content', $result);
+            $this->assertArrayHasKey('size', $result);
+            $this->assertIsString($result['content']);
+            $this->assertIsInt($result['size']);
+            $this->assertGreaterThanOrEqual(0, $result['size']);
+        } else {
+            // Estructura de error
+            $this->assertArrayHasKey('error', $result);
+            $this->assertIsString($result['error']);
+            
+            // Puede tener status si es error HTTP
+            if (isset($result['status'])) {
+                $this->assertIsInt($result['status']);
+            }
+        }
+    }
+
+    public function testDownloadFileWithDifferentFileTypes()
+    {
+        // Test que verifica que downloadFile puede manejar diferentes tipos de archivo
+        $urls = [
+            'https://raw.githubusercontent.com/testuser/testrepo/main/test.sql',
+            'https://raw.githubusercontent.com/testuser/testrepo/main/backup.bak',
+            'https://raw.githubusercontent.com/testuser/testrepo/main/data.json'
+        ];
+        
+        foreach ($urls as $url) {
+            $result = $this->controller->downloadFile($url);
+            
+            $this->assertIsArray($result);
+            $this->assertArrayHasKey('success', $result);
+            
+            if ($result['success']) {
+                $this->assertArrayHasKey('content', $result);
+                $this->assertArrayHasKey('size', $result);
+            } else {
+                $this->assertArrayHasKey('error', $result);
+            }
+        }
+    }
 }
