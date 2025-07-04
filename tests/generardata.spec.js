@@ -5,7 +5,7 @@ test.use({ video: 'on' });
 test('🧪 Flujo completo: login, script, rellenado y visualización de datos generados', async ({ page }) => {
   // Paso 1: Login
   await page.goto('https://datafiller3.sytes.net/views/Auth/login_view.php');
-  await page.fill('input[name="nombre"]', 'mafer');
+  await page.fill('input[name="nombre"]', 'fer');
   await page.fill('input[name="password"]', '123456');
   await Promise.all([
     page.waitForNavigation({ waitUntil: 'domcontentloaded' }),

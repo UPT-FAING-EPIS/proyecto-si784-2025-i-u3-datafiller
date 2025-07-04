@@ -13,7 +13,7 @@ test('🧪 Flujo completo: login, análisis y generación de datos', async ({ pa
   console.log('✅ Página de login cargada');
 
   // Paso 2: Llenar credenciales y enviar
-  await page.fill('input[name="nombre"]', 'fer1');
+  await page.fill('input[name="nombre"]', 'fer');
   await page.fill('input[name="password"]', '123456');
   await page.click('button[type="submit"]');
   await page.waitForURL('**/views/User/generardata.php', { timeout: 15000 });
