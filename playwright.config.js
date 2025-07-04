@@ -3,11 +3,20 @@ const { defineConfig } = require('@playwright/test');
 
 module.exports = defineConfig({
   timeout: 30000, // Tiempo máximo de cada test
-  testDir: './DATAFILLER/tests', // Carpeta raíz donde están tus pruebas
   retries: 0,
   reporter: [
     ['list'],
-    ['allure-playwright'] // Generador de reportes tipo BDD
+    ['allure-playwright'] // Reporte en formato BDD
+  ],
+  projects: [
+    {
+      name: 'main-tests',
+      testDir: './tests', // ✅ Ruta 1
+    },
+    {
+      name: 'datafiller-tests',
+      testDir: './DATAFILLER/tests/integration', // ✅ Ruta 2
+    }
   ],
   use: {
     video: 'on',
