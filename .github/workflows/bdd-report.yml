@@ -74,7 +74,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: BDD-Allure-Report
-          path: ./public
+          path: ./public/allure-report
+
+      # Opcional: Agrega un index.html con enlaces a otros reportes (si los tienes)
+      - name: ➕ Crear página de índice
+        run: |
+          echo "<h1>Reportes disponibles</h1>" > ./public/index.html
+          echo "<ul>" >> ./public/index.html
+          echo "<li><a href='./allure-report/index.html'>Reporte Allure - BDD</a></li>" >> ./public/index.html
+          echo "</ul>" >> ./public/index.html
 
       - name: 🚀 Publicar en GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
