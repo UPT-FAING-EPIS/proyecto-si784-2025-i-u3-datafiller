@@ -1,0 +1,3 @@
+🛠️ Página de configuración cargada
+📊 Página de resultados cargada
+🎉 Datos generados y mostrados exitosamente
