@@ -1,8 +1,0 @@
-🔐 Iniciando prueba de login...
-✅ Página de login cargada
-✅ Redirección detectada: https://datafiller3.sytes.net/views/User/generardata.php
-📝 Textarea detectado
-🧾 Script ingresado
-🛠️ Redirigido a configuracion.php
-📊 Página de resultados cargada
-🎉 Datos generados y mostrados exitosamente

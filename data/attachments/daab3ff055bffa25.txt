@@ -1,6 +1,0 @@
-🔐 Iniciando prueba de login...
-✅ Página de login cargada
-✍️ Credenciales ingresadas
-📨 Formulario enviado
-✅ Redirección exitosa después del login
-🎉 Login confirmado con mensaje de bienvenida

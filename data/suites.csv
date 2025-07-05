@@ -1,8 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","92172","🧪 Flujo completo: login, análisis y generación de datos","datafiller-tests","Sat Jul 05 15:56:38 UTC 2025","broken","Sat Jul 05 15:58:10 UTC 2025","","DATAFILLER/tests/integration/login-generar-datos.spec.js","",""
-"","897","Prueba de login con credenciales incorrectas","main-tests","Sat Jul 05 15:55:00 UTC 2025","passed","Sat Jul 05 15:55:01 UTC 2025","","tests/loginerror.spec.js","",""
-"","1571","Prueba de registro de nuevo usuario","main-tests","Sat Jul 05 15:55:01 UTC 2025","passed","Sat Jul 05 15:55:03 UTC 2025","","tests/registro.spec.js","",""
-"","9604","🧪 Flujo completo: login, script, rellenado y visualización de datos generados","main-tests","Sat Jul 05 15:54:54 UTC 2025","passed","Sat Jul 05 15:55:04 UTC 2025","","tests/generardata.spec.js","",""
-"","4392","🔐 Flujo completo: acceso al dashboard solo para usuarios autenticados","main-tests","Sat Jul 05 15:54:54 UTC 2025","passed","Sat Jul 05 15:54:59 UTC 2025","","tests/data.spec.js","",""
-"","6855","🧪 Flujo completo: login, análisis y generación de datos","","Fri Jul 04 02:00:47 UTC 2025","failed","Fri Jul 04 02:00:54 UTC 2025","","integration\login-generar-datos.spec.js","",""
-"","1791","Prueba de login en el sistema - caso exitoso","main-tests","Sat Jul 05 15:54:59 UTC 2025","passed","Sat Jul 05 15:55:00 UTC 2025","","tests/login.spec.js","",""
